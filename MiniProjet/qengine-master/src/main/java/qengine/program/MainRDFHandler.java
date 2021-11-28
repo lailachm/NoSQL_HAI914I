@@ -106,7 +106,24 @@ public final class MainRDFHandler extends AbstractRDFHandler {
 				put(o, s);
 			}
 		}, p);
+		
+		int oo;
+		int pp;
+		int ss;
+		for ( HashMap<Integer, Integer> key : indexOSP.keySet() ) {
+			for (Integer supKey : key.keySet()) {
+				
+			}
+		}
 	};
+	
+	public HashMap<Integer, String> getDico() {
+		return dico;
+	}
+
+	public HashMap<HashMap<Integer, Integer>, Integer> getIndexSPO() {
+		return indexSPO;
+	}
 
 	public void printDico() {
 		System.out.println("-----------------------------");
