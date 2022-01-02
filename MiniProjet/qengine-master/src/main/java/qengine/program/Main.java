@@ -56,12 +56,12 @@ final class Main {
 	/**
 	 * Fichier contenant les requêtes sparql
 	 */
-	static final String queryFile = workingDir + "STAR_ALL_workload.queryset";
+	static final String queryFile = workingDir + "sample_query.queryset";
 
 	/**
 	 * Fichier contenant des données rdf
 	 */
-	static final String dataFile = workingDir + "100K.nt";
+	static final String dataFile = workingDir + "sample_data.nt";
 
 	static HashMap<Integer, String> dico = new HashMap<Integer, String>();
 	static HashMap<HashMap<Integer, Integer>, Integer> indexSPO = new HashMap<HashMap<Integer, Integer>, Integer>();
@@ -262,7 +262,10 @@ final class Main {
 					ParsedQuery query = sparqlParser.parseQuery(queryString.toString(), baseURI);
 
 					System.out.println("******QUERY N�" + numQuery + "******");
+					long time = System.currentTimeMillis();
 					processAQuery(query); // Traitement de la requête, à adapter/réécrire pour votre programme
+					long endTime = System.currentTimeMillis() - time;
+					System.out.println("endtime : " + endTime + " ms\n");
 					System.out.println("******END QUERY N�" + numQuery + "******\n");
 					numQuery++;
 
@@ -289,13 +292,13 @@ final class Main {
 			rdfParser.parse(dataReader, baseURI);
 
 			dico = rdfHandler.getDico();
-			//rdfHandler.printDico();
+			rdfHandler.printDico();
 //			rdfHandler.printIndexOPS();
 //			rdfHandler.printIndexOSP();
 //			rdfHandler.printIndexPOS();
 //			rdfHandler.printIndexPSO();
 //			rdfHandler.printIndexSOP();
-			//rdfHandler.printIndexSPO();
+			rdfHandler.printIndexSPO();
 			indexSPO = rdfHandler.getIndexSPO();
 
 		}
