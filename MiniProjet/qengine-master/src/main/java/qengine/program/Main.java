@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -58,12 +59,12 @@ final class Main {
 	/**
 	 * Fichier contenant les requÃªtes sparql
 	 */
-	static final String queryFile = workingDir + "sample_query.queryset";
+	static final String queryFile = workingDir + "query.queryset";
 
 	/**
 	 * Fichier contenant des donnÃ©es rdf
 	 */
-	static final String dataFile = workingDir + "sample_data.nt";
+	static final String dataFile = workingDir + "data.nt";
 
 	static HashMap<Integer, String> dico = new HashMap<Integer, String>();
 	static HashMap<HashMap<Integer, Integer>, Integer> indexSPO = new HashMap<HashMap<Integer, Integer>, Integer>();
@@ -124,7 +125,7 @@ final class Main {
 			}
 		}
 
-		//System.out.println("Les objets qui apparaissent dans la requête et le dico : " + listOfObjectsInQueryAndInDico);
+		//System.out.println("Les objets qui apparaissent dans la requête et le dico :" + listOfObjectsInQueryAndInDico);
 		//System.out.println("Les prédicats qui apparaissent dans la requête et le dico : " + listOfPredicatesInQueryAndInDico);
 
 		/*
@@ -175,7 +176,7 @@ final class Main {
 			}
 			keyForLists++;
 		}
-		//System.out.println("Les sujets qui répondent aux statements de la requête : " + subjectsThatAnswerToStatementInQuery);
+		//System.out.println("Les sujets qui répondent aux statements de la requête : "+ subjectsThatAnswerToStatementInQuery);
 
 		/*
 		 * La liste subjectsThatAnswerToStatementInQuery qui contient les sujets qui
@@ -197,7 +198,7 @@ final class Main {
 		for (int s : subjectsThatAnswerToQuery) {
 			for (int key : dico.keySet()) {
 				if (s == key) {
-					//System.out.println("Subject answering the query (match in dico) : " + dico.get(key));
+					//System.out.println("Subject answering the query : " + dico.get(key));
 				}
 			}
 		}
@@ -224,42 +225,55 @@ final class Main {
 	public static void main(String[] args) throws Exception {
 		String pipee = " | ";
 		String ligneCSV = dataFile + pipee + queryFile + pipee;
-		
+
 		int nbTripletsRDF = 0;
 		try {
-		      // create a new file object
-		      File file = new File(dataFile);
+			// create a new file object
+			File file = new File(dataFile);
 
-		      // create an object of Scanner
-		      // associated with the file
-		      Scanner sc = new Scanner(file);
+			// create an object of Scanner
+			// associated with the file
+			Scanner sc = new Scanner(file);
 
-		      // read each line and
-		      // count number of lines
-		      while(sc.hasNextLine()) {
-		        sc.nextLine();
-		        nbTripletsRDF++;
-		      }
-		      //System.out.println("Total Number of Lines: " + count);
+			// read each line and
+			// count number of lines
+			while (sc.hasNextLine()) {
+				sc.nextLine();
+				nbTripletsRDF++;
+			}
+			// System.out.println("Total Number of Lines: " + count);
 
-		      // close scanner
-		      sc.close();
-		    } catch (Exception e) {
-		      e.getStackTrace();
-		    }
-		
-		ligneCSV+=nbTripletsRDF + pipee;
-		
+			// close scanner
+			sc.close();
+		} catch (Exception e) {
+			e.getStackTrace();
+		}
+
+		ligneCSV += nbTripletsRDF + pipee;
+
 		long time = System.currentTimeMillis();
-		ligneCSV+=parseData();
-		ligneCSV+=parseQueries();
+		ligneCSV += parseData();
+		ligneCSV += parseQueries();
 		long endTime = System.currentTimeMillis() - time;
-		//System.out.println("endtime : " + endTime + " ms\n");
-		
-		ligneCSV+=endTime;
-		
-		System.out.println("nom fichier données | nom fichier requetes | nombre de triplets | temps création dico | temps création index | nombre index | temps lecture données | nombre requetes | temps lecture requetes | temps total");
+		// System.out.println("endtime : " + endTime + " ms\n");
+
+		ligneCSV += endTime + pipee + "NON_DISPONIBLE";
+
+		String titres = "nom fichier donnees | nom fichier requetes | nombre de triplets RDF | temps creation dico(ms) | temps creation index(ms) | nombre index | temps lecture donnees(ms) | nombre requetes | temps lecture requetes(ms) | temps total(ms) | temps evaluation workload(ms) \n";
+		System.out.println(titres);
 		System.out.println(ligneCSV);
+
+
+		try (PrintWriter writer = new PrintWriter("output/file.csv")) {
+
+			writer.write(titres.toString());
+			writer.write(ligneCSV.toString());
+
+			//System.out.println("csv done!");
+
+		} catch (FileNotFoundException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 
 	// ========================================================================
@@ -317,17 +331,17 @@ final class Main {
 				}
 
 			}
-			//System.out.println("numQuery : " + numQuery);
+			// System.out.println("numQuery : " + numQuery);
 			long tpsLectureRequetes = System.currentTimeMillis() - tpsDebutLectureRequetes;
-			//System.out.println("tpsLectureRequetes : " + tpsLectureRequetes + "ms");
-			
+			// System.out.println("tpsLectureRequetes : " + tpsLectureRequetes + "ms");
+
 			String sousLigneCSV = numQuery + " | " + tpsLectureRequetes + " | ";
 			return sousLigneCSV;
 		}
 	}
 
 	/**
-	 * Traite chaque triple lu dans {@link #dataFile} avec {@link MainRDFHandler}.
+	 * Traite chaque triple lu dans {@link #dataFile} avec {@link RDFHandler}.
 	 */
 	private static String parseData() throws FileNotFoundException, IOException {
 
@@ -339,7 +353,7 @@ final class Main {
 			RDFParser rdfParser = Rio.createParser(RDFFormat.NTRIPLES);
 
 			// On utilise notre implÃ©mentation de handler
-			MainRDFHandler rdfHandler = new MainRDFHandler();
+			RDFHandler rdfHandler = new RDFHandler();
 			rdfParser.setRDFHandler(rdfHandler);
 
 			// Parsing et traitement de chaque triple par le handler
@@ -348,7 +362,7 @@ final class Main {
 			long tpsDebutCreationDico = System.currentTimeMillis();
 			dico = rdfHandler.getDico();
 			long tpsCreationDico = System.currentTimeMillis() - tpsDebutCreationDico;
-			//System.out.println("tpsCreationDico : " + tpsCreationDico + "ms");
+			// System.out.println("tpsCreationDico : " + tpsCreationDico + "ms");
 //			rdfHandler.printDico();
 //			rdfHandler.printIndexOPS();
 //			rdfHandler.printIndexOSP();
@@ -359,14 +373,14 @@ final class Main {
 			long tpsDebutCreationIndexSPO = System.currentTimeMillis();
 			indexSPO = rdfHandler.getIndexSPO();
 			long tpsCreationIndexSPO = System.currentTimeMillis() - tpsDebutCreationIndexSPO;
-			//System.out.println("tpsCreationIndexSPO : " + tpsCreationIndexSPO + "ms");
+			// System.out.println("tpsCreationIndexSPO : " + tpsCreationIndexSPO + "ms");
 
-			//System.out.println("nb index : " + indexSPO.size());
+			// System.out.println("nb index : " + indexSPO.size());
 			sousLigneCSVData = tpsCreationDico + pie + tpsCreationIndexSPO + pie + indexSPO.size() + pie;
 		}
 		long tpsLectureDonnees = System.currentTimeMillis() - tpsDebutLectureDonnees;
-		//System.out.println("tpsLectureDonnees : " + tpsLectureDonnees + "ms");
-		
+		// System.out.println("tpsLectureDonnees : " + tpsLectureDonnees + "ms");
+
 		sousLigneCSVData += tpsLectureDonnees + pie;
 		return sousLigneCSVData;
 //		ArrayList<String> list = new ArrayList<String>();

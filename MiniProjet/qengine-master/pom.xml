@@ -21,6 +21,7 @@
 				<configuration>
 					<archive>
 						<manifest>
+							<addClasspath>true</addClasspath>
 							<mainClass>qengine.Main</mainClass>
 						</manifest>
 					</archive>

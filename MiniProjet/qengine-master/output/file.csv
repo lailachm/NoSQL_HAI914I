@@ -1,0 +1,2 @@
+nom fichier donnees | nom fichier requetes | nombre de triplets RDF | temps creation dico(ms) | temps creation index(ms) | nombre index | temps lecture donnees(ms) | nombre requetes | temps lecture requetes(ms) | temps total(ms) | temps evaluation workload(ms) 
+data/data.nt | data/query.queryset | 1229 | 0 | 0 | 414 | 758 | 200 | 29711 | 30488 | NON_DISPONIBLE
